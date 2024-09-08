@@ -5,19 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rotating 3D Red Cube</title>
     <style>
+        <style>
         body { margin: 0; }
-        canvas { display: block; }
+        #cube-container { 
+            width: 100%; 
+            height: 800px; 
+            /* You can adjust the height as needed */
+        }
+    </style>
     </style>
 </head>
 <body>
+    <div id="cube-container"></div>
+     <!-- More of your existing content -->
+
+    <!-- Add these scripts at the end of the body -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         // Set up the scene, camera, and renderer
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const container = document.getElementById('cube-container');
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
 
         // Create a red cube
         const geometry = new THREE.BoxGeometry();
@@ -27,24 +38,38 @@
 
         camera.position.z = 5;
 
+        // Variable to control rotation
+        let isRotating = true;
+
         // Animation function
         function animate() {
             requestAnimationFrame(animate);
 
-            // Rotate the cube
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
+            // Rotate the cube only if isRotating is true
+            if (isRotating) {
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+            }
 
             renderer.render(scene, camera);
         }
 
         animate();
 
+        // Event listeners for mouse interaction
+        container.addEventListener('mouseenter', () => {
+            isRotating = false;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isRotating = true;
+        });
+
         // Handle window resizing
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(container.clientWidth, container.clientHeight);
         });
     </script>
 </body>
