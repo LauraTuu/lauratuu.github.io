@@ -3,74 +3,586 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rotating 3D Red Cube</title>
+    <title>Trick or Treat Chat Game</title>
     <style>
-        <style>
-        body { margin: 0; }
-        #cube-container { 
-            width: 100%; 
-            height: 800px; 
-            /* You can adjust the height as needed */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    </style>
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0033 0%, #4a0080 50%, #000000 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        .game-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .sidebar {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #9d4edd;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ff6b35;
+            text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+            animation: spookyGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes spookyGlow {
+            from { text-shadow: 0 0 10px rgba(255, 107, 53, 0.5); }
+            to { text-shadow: 0 0 20px rgba(255, 107, 53, 0.8), 0 0 30px rgba(255, 107, 53, 0.3); }
+        }
+
+        .chat-simulation {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .username {
+            color: #9d4edd;
+            font-weight: bold;
+        }
+
+        .command {
+            color: #ff6b35;
+            font-weight: bold;
+        }
+
+        .result-display {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .result-display.treat {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            animation: treatPulse 0.6s ease-in-out;
+        }
+
+        .result-display.trick {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+            animation: trickShake 0.6s ease-in-out;
+        }
+
+        @keyframes treatPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes trickShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .result-emoji {
+            font-size: 4em;
+            margin-bottom: 10px;
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .result-text {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .result-description {
+            font-size: 1em;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #9d4edd, #7209b7);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.4);
+        }
+
+        .stats {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .stats h3 {
+            color: #ff6b35;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+
+        .leaderboard {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .leaderboard h3 {
+            color: #9d4edd;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+
+        .leader-rank {
+            font-weight: bold;
+            color: #ff6b35;
+            width: 30px;
+        }
+
+        .config-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .config-item {
+            margin-bottom: 10px;
+        }
+
+        .config-item label {
+            display: block;
+            margin-bottom: 5px;
+            color: #9d4edd;
+            font-size: 0.9em;
+        }
+
+        .config-item input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .floating-emoji {
+            position: fixed;
+            font-size: 2em;
+            pointer-events: none;
+            animation: floatUp 3s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="cube-container"></div>
-     <!-- More of your existing content -->
+    <div class="container">
+        <div class="game-area">
+            <h1 class="title">🎃 TRICK OR TREAT 🎃</h1>
+            
+            <div class="result-display" id="resultDisplay">
+                <div class="result-emoji">🎃</div>
+                <div class="result-text">Welcome to Trick or Treat!</div>
+                <div class="result-description">Type !trickortreat in chat to play</div>
+            </div>
 
-    <!-- Add these scripts at the end of the body -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+            <div class="controls">
+                <button class="btn" onclick="simulateTrickOrTreat()">🎮 Simulate !trickortreat</button>
+                <button class="btn secondary" onclick="clearResults()">🧹 Clear</button>
+                <button class="btn secondary" onclick="resetStats()">📊 Reset Stats</button>
+            </div>
+
+            <div class="chat-simulation" id="chatSimulation">
+                <div class="chat-message">
+                    <span class="username">StreamBot:</span> Trick or Treat game is now active! Type <span class="command">!trickortreat</span> to play!
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="config-panel">
+                <h3>⚙️ Game Settings</h3>
+                <div class="config-item">
+                    <label>Treat Chance (%):</label>
+                    <input type="number" id="treatChance" value="70" min="0" max="100">
+                </div>
+                <div class="config-item">
+                    <label>Cooldown (seconds):</label>
+                    <input type="number" id="cooldown" value="30" min="0" max="300">
+                </div>
+            </div>
+
+            <div class="stats">
+                <h3>📊 Statistics</h3>
+                <div class="stat-item">
+                    <span>Total Plays:</span>
+                    <span id="totalPlays">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>🍬 Treats:</span>
+                    <span id="totalTreats">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>👻 Tricks:</span>
+                    <span id="totalTricks">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Success Rate:</span>
+                    <span id="successRate">0%</span>
+                </div>
+            </div>
+
+            <div class="leaderboard">
+                <h3>🏆 Top Treat Collectors</h3>
+                <div id="leaderboardList">
+                    <div class="leader-item">
+                        <div>
+                            <span class="leader-rank">#1</span>
+                            <span>SpookyViewer</span>
+                        </div>
+                        <span>5 🍬</span>
+                    </div>
+                    <div class="leader-item">
+                        <div>
+                            <span class="leader-rank">#2</span>
+                            <span>GhostHunter</span>
+                        </div>
+                        <span>3 🍬</span>
+                    </div>
+                    <div class="leader-item">
+                        <div>
+                            <span class="leader-rank">#3</span>
+                            <span>PumpkinKing</span>
+                        </div>
+                        <span>2 🍬</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Set up the scene, camera, and renderer
-        const scene = new THREE.Scene();
-        const container = document.getElementById('cube-container');
-        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
+        // Game data
+        let gameStats = {
+            totalPlays: 0,
+            totalTreats: 0,
+            totalTricks: 0
+        };
 
-        // Create a red cube
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+        let playerData = {};
+        let cooldowns = {};
 
-        camera.position.z = 5;
+        // Treats and tricks data
+        const treats = [
+            { emoji: "🍫", text: "Chocolate Bar!", description: "Sweet victory! You found a delicious chocolate bar!", points: 1 },
+            { emoji: "🍭", text: "Lollipop!", description: "A colorful lollipop appears in your bag!", points: 1 },
+            { emoji: "🍬", text: "Hard Candy!", description: "Classic candy! Your taste buds rejoice!", points: 1 },
+            { emoji: "🎃", text: "Pumpkin Spice Treat!", description: "A rare seasonal delight! Extra spooky points!", points: 2 },
+            { emoji: "🍪", text: "Ghost-shaped Cookie!", description: "Boo-tiful and delicious!", points: 1 },
+            { emoji: "🧁", text: "Halloween Cupcake!", description: "A perfectly frosted treat with orange and black sprinkles!", points: 2 },
+            { emoji: "✨", text: "JACKPOT!", description: "🎰 You hit the candy jackpot! Multiple treats fall out!", points: 5 },
+            { emoji: "🏆", text: "Golden Pumpkin!", description: "🌟 Legendary find! The rarest treat of all!", points: 10 }
+        ];
 
-        // Variable to control rotation
-        let isRotating = true;
+        const tricks = [
+            { emoji: "🪨", text: "You got a rock!", description: "Charlie Brown would understand your pain..." },
+            { emoji: "🥬", text: "Brussels Sprouts!", description: "Someone's playing a cruel joke with vegetables!" },
+            { emoji: "👻", text: "Ghost Theft!", description: "A mischievous ghost stole your last candy!" },
+            { emoji: "🕷️", text: "Spider Surprise!", description: "Eek! A plastic spider jumps out instead of candy!" },
+            { emoji: "💀", text: "Skeleton Key!", description: "You found a key... but it opens nothing!" },
+            { emoji: "🧟", text: "Zombie Groan!", description: "A zombie groaned at you instead of giving candy!" },
+            { emoji: "🦇", text: "Bat Attack!", description: "A rubber bat flies out and bonks you on the head!" },
+            { emoji: "🎭", text: "Trick Mirror!", description: "You only see your reflection... spooky but no candy!" }
+        ];
 
-        // Animation function
-        function animate() {
-            requestAnimationFrame(animate);
+        const spookyNames = [
+            "GhostHunter92", "SpookyViewer", "PumpkinKing", "BatWatcher", "CandyCorn",
+            "WitchBrew", "SkeletonDance", "HauntedUser", "SpiderQueen", "ZombieWalk",
+            "VampireNight", "PhantomPlayer", "GrimReaper", "BooMaster", "CreeperKeeper"
+        ];
 
-            // Rotate the cube only if isRotating is true
-            if (isRotating) {
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.01;
-            }
-
-            renderer.render(scene, camera);
+        function getRandomName() {
+            return spookyNames[Math.floor(Math.random() * spookyNames.length)] + Math.floor(Math.random() * 1000);
         }
 
-        animate();
+        function simulateTrickOrTreat() {
+            const username = getRandomName();
+            const treatChance = parseInt(document.getElementById('treatChance').value) || 70;
+            const cooldownTime = parseInt(document.getElementById('cooldown').value) || 30;
+            
+            // Check cooldown
+            const now = Date.now();
+            if (cooldowns[username] && now - cooldowns[username] < cooldownTime * 1000) {
+                const remainingTime = Math.ceil((cooldownTime * 1000 - (now - cooldowns[username])) / 1000);
+                addChatMessage(username, "!trickortreat", `⏰ Wait ${remainingTime} more seconds!`);
+                return;
+            }
 
-        // Event listeners for mouse interaction
-        container.addEventListener('mouseenter', () => {
-            isRotating = false;
-        });
+            cooldowns[username] = now;
+            
+            // Determine if trick or treat
+            const isTreat = Math.random() * 100 < treatChance;
+            let result;
+            
+            if (isTreat) {
+                // Weighted random for treats (rarer treats have lower chance)
+                const rand = Math.random();
+                if (rand < 0.02) result = treats[7]; // Golden Pumpkin (2%)
+                else if (rand < 0.05) result = treats[6]; // Jackpot (3%)
+                else if (rand < 0.15) result = treats[3]; // Pumpkin Spice (10%)
+                else if (rand < 0.25) result = treats[5]; // Cupcake (10%)
+                else result = treats[Math.floor(Math.random() * 5)]; // Common treats (75%)
+                
+                gameStats.totalTreats++;
+                
+                // Update player data
+                if (!playerData[username]) playerData[username] = 0;
+                playerData[username] += result.points;
+                
+                displayResult(result, true);
+                addChatMessage(username, "!trickortreat", `${result.emoji} ${result.text}`);
+                createFloatingEmoji(result.emoji);
+            } else {
+                result = tricks[Math.floor(Math.random() * tricks.length)];
+                gameStats.totalTricks++;
+                displayResult(result, false);
+                addChatMessage(username, "!trickortreat", `${result.emoji} ${result.text}`);
+                createFloatingEmoji(result.emoji);
+            }
+            
+            gameStats.totalPlays++;
+            updateStats();
+            updateLeaderboard();
+        }
 
-        container.addEventListener('mouseleave', () => {
-            isRotating = true;
-        });
+        function displayResult(result, isTreat) {
+            const resultDisplay = document.getElementById('resultDisplay');
+            const resultClass = isTreat ? 'treat' : 'trick';
+            
+            resultDisplay.className = `result-display ${resultClass}`;
+            resultDisplay.innerHTML = `
+                <div class="result-emoji">${result.emoji}</div>
+                <div class="result-text">${result.text}</div>
+                <div class="result-description">${result.description}</div>
+                ${result.points ? `<div style="color: #00ff88; margin-top: 10px; font-weight: bold;">+${result.points} points!</div>` : ''}
+            `;
+        }
 
-        // Handle window resizing
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        });
+        function addChatMessage(username, command, result) {
+            const chatDiv = document.getElementById('chatSimulation');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            messageDiv.innerHTML = `
+                <span class="username">${username}:</span> 
+                <span class="command">${command}</span> - ${result}
+            `;
+            
+            chatDiv.appendChild(messageDiv);
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+            
+            // Keep only last 20 messages
+            while (chatDiv.children.length > 20) {
+                chatDiv.removeChild(chatDiv.firstChild);
+            }
+        }
+
+        function createFloatingEmoji(emoji) {
+            const floatingEmoji = document.createElement('div');
+            floatingEmoji.className = 'floating-emoji';
+            floatingEmoji.textContent = emoji;
+            floatingEmoji.style.left = Math.random() * window.innerWidth + 'px';
+            floatingEmoji.style.top = window.innerHeight - 100 + 'px';
+            
+            document.body.appendChild(floatingEmoji);
+            
+            setTimeout(() => {
+                document.body.removeChild(floatingEmoji);
+            }, 3000);
+        }
+
+        function updateStats() {
+            document.getElementById('totalPlays').textContent = gameStats.totalPlays;
+            document.getElementById('totalTreats').textContent = gameStats.totalTreats;
+            document.getElementById('totalTricks').textContent = gameStats.totalTricks;
+            
+            const successRate = gameStats.totalPlays > 0 ? 
+                Math.round((gameStats.totalTreats / gameStats.totalPlays) * 100) : 0;
+            document.getElementById('successRate').textContent = successRate + '%';
+        }
+
+        function updateLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            const sortedPlayers = Object.entries(playerData)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+            
+            leaderboardList.innerHTML = sortedPlayers.map(([username, points], index) => `
+                <div class="leader-item">
+                    <div>
+                        <span class="leader-rank">#${index + 1}</span>
+                        <span>${username}</span>
+                    </div>
+                    <span>${points} 🍬</span>
+                </div>
+            `).join('');
+        }
+
+        function clearResults() {
+            const resultDisplay = document.getElementById('resultDisplay');
+            resultDisplay.className = 'result-display';
+            resultDisplay.innerHTML = `
+                <div class="result-emoji">🎃</div>
+                <div class="result-text">Ready for more!</div>
+                <div class="result-description">Type !trickortreat to play again</div>
+            `;
+        }
+
+        function resetStats() {
+            if (confirm('Are you sure you want to reset all statistics?')) {
+                gameStats = { totalPlays: 0, totalTreats: 0, totalTricks: 0 };
+                playerData = {};
+                cooldowns = {};
+                updateStats();
+                updateLeaderboard();
+                clearResults();
+                
+                // Clear chat
+                const chatDiv = document.getElementById('chatSimulation');
+                chatDiv.innerHTML = `
+                    <div class="chat-message">
+                        <span class="username">StreamBot:</span> Stats reset! Trick or Treat game restarted!
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        updateStats();
+        
+        // Auto-simulate for demo (remove this in production)
+        setInterval(() => {
+            if (Math.random() < 0.3) { // 30% chance every 3 seconds
+                simulateTrickOrTreat();
+            }
+        }, 3000);
     </script>
 </body>
 </html>
