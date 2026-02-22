@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.127.0/build/three.min.js"></script>
 <script type="importmap">
   {
     "imports": {
@@ -10,20 +8,22 @@
       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
     }
   }
-  
 </script>
- <canvas id="canvas"></canvas>
  <style>
   * { margin: 0; padding: 0; }
   canvas { display: block; }
 </style>
+</head>
+  
 </body>
+   <canvas id="canvas"></canvas>
+  
  <script type="module">
   import * as THREE from 'three';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-   import { LoopSubdivision } from 'three/addons/modifiers/LoopSubdivisionModifier.js'; // add this line
+  import { SubdivisionModifier } from 'three/addons/modifiers/SubdivisionModifier.js';
 
   // Scene setup
   const scene = new THREE.Scene();
@@ -73,7 +73,8 @@
               // Smooth shading
     child.geometry.computeVertexNormals();
     child.castShadow = true;
-              const smoothGeo = LoopSubdivision.modify(child.geometry, 2); // add this
+    const modifier = new SubdivisionModifier(2);
+    child.geometry = modifier.modify(child.geometry);
     child.geometry = smoothGeo; 
         }
       });
@@ -97,4 +98,5 @@
   }
   animate();
 </script>
+</body>
 </html>
