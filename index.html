@@ -1,99 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
     }
-  }
-</script>
- <style>
-  * { margin: 0; padding: 0; }
-  canvas { display: block; }
-</style>
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; }
+    canvas { display: block; }
+  </style>
 </head>
-  
-</body>
-   <canvas id="canvas"></canvas>
-  
- <script type="module">
-  import * as THREE from 'three';
-  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-  import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-  import { SubdivisionModifier } from 'three/addons/modifiers/SubdivisionModifier.js';
 
-  // Scene setup
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 1, 3);
+<body>
+  <canvas id="canvas"></canvas>
 
-  const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1;
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+    import { SubdivisionModifier } from 'three/addons/modifiers/SubdivisionModifier.js';
 
-  // Orbit controls (click and drag to rotate)
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1, 3);
 
-  // Load HDRI environment
-  const rgbeLoader = new RGBELoader();
-  rgbeLoader.load('ferndale_studio_04_1k.hdr', (texture) => {
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.environment = texture; // used for lighting/reflections
-    scene.background = texture; // used as visible background
-  });
+    const renderer = new THREE.WebGLRenderer({
+      canvas: document.getElementById('canvas'),
+      antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1;
 
-  // Glass material
-  const glassMaterial = new THREE.MeshPhysicalMaterial({
-    transmission: 1,
-    thickness: 0.5,
-    roughness: 0,
-    ior: 1.5,
-    transparent: true,
-    envMapIntensity: 1,
-  });
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
-  // Load your model
-  const loader = new GLTFLoader();
-  loader.load(
-    'chromecube.glb',
-    (gltf) => {
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load('ferndale_studio_04_1k.hdr', (texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      scene.environment = texture;
+      scene.background = texture;
+    });
+
+    const glassMaterial = new THREE.MeshPhysicalMaterial({
+      transmission: 1,
+      thickness: 0.5,
+      roughness: 0,
+      ior: 1.5,
+      transparent: true,
+      envMapIntensity: 1,
+    });
+
+    const loader = new GLTFLoader();
+    loader.load('chromecube.glb', (gltf) => {
       const model = gltf.scene;
 
-      // Apply glass material to all meshes in the model
       model.traverse((child) => {
         if (child.isMesh) {
           child.material = glassMaterial;
-          
-              // Smooth shading
-    child.geometry.computeVertexNormals();
-    child.castShadow = true;
+
+          const modifier = new SubdivisionModifier(2);
+          child.geometry = modifier.modify(child.geometry);
+
+          child.geometry.computeVertexNormals();
+          child.castShadow = true;
         }
       });
 
       scene.add(model);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
     }
-  );
-
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-
-  // Animate
-  function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
-</script>
+    animate();
+  </script>
 </body>
 </html>
