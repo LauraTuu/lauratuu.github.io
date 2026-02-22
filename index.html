@@ -23,7 +23,7 @@
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-  import { SubdivisionModifier } from 'three/addons/modifiers/SubdivisionModifier.js';
+  import { LoopSubdivision } from 'https://unpkg.com/three-subdivide/build/index.module.js';
 
   // Scene setup
   const scene = new THREE.Scene();
@@ -73,9 +73,9 @@
               // Smooth shading
     child.geometry.computeVertexNormals();
     child.castShadow = true;
-    const modifier = new SubdivisionModifier(2);
-    child.geometry = modifier.modify(child.geometry);
-    child.geometry = smoothGeo; 
+    if(child instanceof THREE.Mesh)
+           {
+              child.material.shading = THREE.SmoothShading;
         }
       });
 
