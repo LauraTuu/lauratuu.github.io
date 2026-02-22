@@ -77,8 +77,8 @@ const glassMaterialB = new THREE.MeshPhysicalMaterial({
   color: new THREE.Color(0, 0, 1),
 });
 
+    const loader = new GLTFLoader();
     
-
     loader.load('chromehorse.glb', (gltf) => {
   const materials = [glassMaterialR, glassMaterialG, glassMaterialB];
 
