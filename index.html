@@ -23,7 +23,7 @@
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-  import { LoopSubdivision } from 'https://unpkg.com/three-subdivide/build/index.module.js';
+  import { SubdivisionModifier } from 'three/addons/modifiers/SubdivisionModifier.js';
 
   // Scene setup
   const scene = new THREE.Scene();
@@ -69,6 +69,9 @@
       model.traverse((child) => {
         if (child.isMesh) {
           child.material = glassMaterial;
+
+    const modifier = new SubdivisionModifier(2);
+child.geometry = modifier.modify(child.geometry);
 
               // Smooth shading
     child.geometry.computeVertexNormals();
