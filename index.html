@@ -50,30 +50,51 @@
       scene.background = texture;
     });
 
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
-      transmission: 1,
-      thickness: 0.5,
-      roughness: 0,
-      ior: 1.5,
-      transparent: true,
-      envMapIntensity: 1,
+  const glassMaterialR = new THREE.MeshPhysicalMaterial({
+  transmission: 1,
+  thickness: 2,
+  roughness: 0,
+  ior: 1.45, // red bends least
+  transparent: true,
+  color: new THREE.Color(1, 0, 0),
+});
+
+const glassMaterialG = new THREE.MeshPhysicalMaterial({
+  transmission: 1,
+  thickness: 2,
+  roughness: 0,
+  ior: 1.50, // green in the middle
+  transparent: true,
+  color: new THREE.Color(0, 1, 0),
+});
+
+const glassMaterialB = new THREE.MeshPhysicalMaterial({
+  transmission: 1,
+  thickness: 2,
+  roughness: 0,
+  ior: 1.55, // blue bends most
+  transparent: true,
+  color: new THREE.Color(0, 0, 1),
+});
+
+    
+
+    loader.load('chromehorse.glb', (gltf) => {
+  const materials = [glassMaterialR, glassMaterialG, glassMaterialB];
+
+  materials.forEach((mat) => {
+    const clone = gltf.scene.clone(true);
+    clone.traverse((child) => {
+      if (child.isMesh) {
+        child.geometry.computeVertexNormals();
+        child.material = mat;
+        mat.blending = THREE.AdditiveBlending; // combines the RGB layers
+        mat.depthWrite = false;
+      }
     });
-
-    const loader = new GLTFLoader();
-    loader.load('chromecube.glb', (gltf) => {
-      const model = gltf.scene;
-
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.material = glassMaterial;
-
-          //const modifier = new SubdivisionModifier(2);
-          //child.geometry = modifier.modify(child.geometry);
-
-          child.geometry.computeVertexNormals();
-          child.castShadow = true;
-        }
-      });
+    scene.add(clone);
+  });
+});
 
       scene.add(model);
     });
