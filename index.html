@@ -70,8 +70,7 @@
         if (child.isMesh) {
           child.material = glassMaterial;
 
-    const modifier = new SubdivisionModifier(2);
-child.geometry = modifier.modify(child.geometry);
+ 
 
               // Smooth shading
     child.geometry.computeVertexNormals();
