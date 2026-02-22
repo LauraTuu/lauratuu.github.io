@@ -69,13 +69,10 @@
       model.traverse((child) => {
         if (child.isMesh) {
           child.material = glassMaterial;
-
- 
-
+          
               // Smooth shading
     child.geometry.computeVertexNormals();
     child.castShadow = true;
-
         }
       });
 
