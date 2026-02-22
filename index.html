@@ -67,8 +67,8 @@
         if (child.isMesh) {
           child.material = glassMaterial;
 
-          const modifier = new SubdivisionModifier(2);
-          child.geometry = modifier.modify(child.geometry);
+          //const modifier = new SubdivisionModifier(2);
+          //child.geometry = modifier.modify(child.geometry);
 
           child.geometry.computeVertexNormals();
           child.castShadow = true;
